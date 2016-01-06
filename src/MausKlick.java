@@ -57,8 +57,9 @@ public class MausKlick extends MeinFenster{
             int y1 = randomGen.nextInt(HEIGHT_MAX);
             int y2 = randomGen.nextInt(HEIGHT_MAX);
             System.out.println(Integer.toString(x1)+"   "+Integer.toString(x2)+"   "+Integer.toString(y1)+"   "+Integer.toString(y2));
-            drawLineVerison1(x1, y1, x2, y2);
+            drawLineVersion2(x1, y1, x2, y2);
         }
+    }
 
     private void drawLineVersion2(int x1, int y1, int x2, int y2){
         if (x2<=x1){ drawLineVersion2(x2, y2, x1, y1);}
@@ -70,13 +71,6 @@ public class MausKlick extends MeinFenster{
             setPixel(x, m*x+b);
         }
 
-    }
-
-    private void drawRandomLines() {
-        int x1 = randomGen.nextInt(WIDTH_MAX);
-        int x2 = randomGen.nextInt(WIDTH_MAX);
-        int y1 = randomGen.nextInt(HEIGHT_MAX);
-        int y2 = randomGen.nextInt(HEIGHT_MAX);
     }
 
     private void drawLine(int x1, int y1, int x2, int y2){
