@@ -15,6 +15,7 @@ public class MausKlick extends MeinFenster{
                 setPixel(e.getX(),e.getY());
                 //drawLine(e.getX(), e.getY() , e.getX()+40, e.getY()+ 20);
                 drawLineVerison1(e.getX(), e.getY() , e.getX()+40, e.getY()+ 20);
+                drawRandomLines();
             }
         });
 
@@ -47,10 +48,16 @@ public class MausKlick extends MeinFenster{
         setPixel(x2,y2);
     }
     private void drawRandomLines(){
-        int x1 = randomGen.nextInt()%WIDTH_MAX;
-        int x2 = randomGen.nextInt()%WIDTH_MAX;
-        int y1 = randomGen.nextInt()%HEIGHT_MAX;
-        int y2 = randomGen.nextInt()%HEIGHT_MAX;
+
+        for(int i = 0; i<100;i++) {
+
+            int x1 = randomGen.nextInt(WIDTH_MAX);
+            int x2 = randomGen.nextInt(WIDTH_MAX);
+            int y1 = randomGen.nextInt(HEIGHT_MAX);
+            int y2 = randomGen.nextInt(HEIGHT_MAX);
+            System.out.println(Integer.toString(x1)+"   "+Integer.toString(x2)+"   "+Integer.toString(y1)+"   "+Integer.toString(y2));
+            drawLineVerison1(x1, y1, x2, y2);
+        }
     }
 
     private void drawLine(int x1, int y1, int x2, int y2){
