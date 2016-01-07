@@ -6,9 +6,10 @@ import java.util.Random;
 import static java.lang.Math.toIntExact;
 
 public class MausKlick extends MeinFenster{
+    static int ANZ_VERSUCHEN = 10;
     Random randomGen = new Random();
-    int times[] = new int[100];
-    int timesMultpl[][] = new int[5][100];
+    int times[] = new int[ANZ_VERSUCHEN];
+    int timesMultpl[][] = new int[5][ANZ_VERSUCHEN];
     final static int WIDTH_MAX = 1280;
     final static int HEIGHT_MAX = 720;
 
@@ -25,8 +26,9 @@ public class MausKlick extends MeinFenster{
         void draw();
     }
 
-    private DrawFigure[] drawLines = new DrawFigure[]{
+    private DrawFigure[] drawFunctions = new DrawFigure[]{
             ()->drawLineVerison1(),
+            ()->drawLineBresenham(),
             ()->drawLineVersion2()
     };
 
@@ -49,24 +51,62 @@ public class MausKlick extends MeinFenster{
     }
 
     private void printTestResult() {
+        final int placeX = 440;
+
+        final int placeY = 620;
+        final int placeYBoxerW = 580;
+        final int mainInfoBoxX = 420;
+        int breighteBox = 20;
+        int shift = 100;
+
         Graphics g = getGraphics();
         g.setColor(Color.black);
-        g.fillRect(450,250,400,200);//drawRect
+        //g.fillRect(450,250,420,200);//drawRect HINTERGRUND
+        g.fillRect(mainInfoBoxX,0,mainInfoBoxX,720);//drawRect HINTERGRUN
         g.setColor(Color.white);
-        g.drawString("Die Testwerte: ",500,360);
         BoxWhisker boxW = new BoxWhisker(timesMultpl);
+
+        //BOX
+        g.drawLine(mainInfoBoxX,placeYBoxerW,mainInfoBoxX + 420,placeYBoxerW);
+        for (int j=0,counter = 0; j<placeYBoxerW-70; j+=10,counter++){
+            int laenge = 5;
+            if(counter%5==0){
+                g.drawString(" "+counter*10 , placeX,placeYBoxerW - j+4);
+                laenge=10;
+            }
+            else laenge=5;
+            g.drawLine(mainInfoBoxX, placeYBoxerW - j, mainInfoBoxX+laenge, placeYBoxerW - j);
+        }
+        for(int i = 0; i < drawFunctions.length;i++){
+            int qu[] = boxW.getQues(i);
+            for(int q : qu){
+                g.drawLine(placeX+shift,placeYBoxerW-q,placeX+shift+ breighteBox,placeYBoxerW-q);
+            }
+            g.drawLine(placeX+shift,placeYBoxerW-boxW.getMin(i),placeX+shift+breighteBox,placeYBoxerW-boxW.getMin(i));
+            g.drawLine(placeX+shift,placeYBoxerW-boxW.getMax(i),placeX+shift+breighteBox,placeYBoxerW-boxW.getMax(i));
+
+            g.drawLine(placeX+shift,placeYBoxerW-qu[1],placeX+shift,+placeYBoxerW-qu[2]);
+            g.drawLine(placeX+shift+breighteBox,placeYBoxerW-qu[1],placeX+shift+breighteBox,placeYBoxerW-qu[2]);
+            shift+=40;
+        }
+
+        g.drawString("Die Testwerte: ",placeX,placeY);
         int qu[] = boxW.getQues(0);
-        g.drawString("Version 1: Q1:  "+ qu[0] + " Q2 : " + qu[1] + "Q3 : " + qu[2],500,360+20);
+        g.drawString("All floats(x,y): Q1:  "+ qu[0] + " Q2 : " + qu[1] + " Q3 : " + qu[2]+ " Min: " + boxW.getMin(0)+ " Max: " + boxW.getMax(0),placeX,placeY+20);
         int qu2[] = boxW.getQues(1);
-        g.drawString("Version 2: Q1:  "+ qu2[0] + " Q2 : " + qu2[1] + "Q3 : " + qu2[2],500,360+20+20);
+        g.drawString("Bresenham: Q1: "+ qu2[0] + " Q2 : " + qu2[1] + " Q3: " + qu2[2] + " Min: " + boxW.getMin(1)+ " Max: " + boxW.getMax(1),placeX,placeY+20+20);
+        int qu3[] = boxW.getQues(2);
+        g.drawString("Float(y), int(x): Q1:  "+ qu3[0] + " Q2 : " + qu3[1] + " Q3 : " + qu3[2]+ " Min: " + boxW.getMin(2)+ " Max: " + boxW.getMax(2),placeX,placeY+20+20+20);
+        g.drawString("Anzahl von Versuchen: "+ ANZ_VERSUCHEN,placeX,placeY+20+20+20+20);
+
     }
 
     private void fullTest() {
-        for(int funcNumber = 0 ; funcNumber<drawLines.length; funcNumber++) {
+        for(int funcNumber = 0; funcNumber< drawFunctions.length; funcNumber++) {
 
             for (versuchNummer = 0; versuchNummer < times.length; versuchNummer++) {
                 final int finalFuncNumber = funcNumber;
-                drawRandomLines(() -> drawLines[finalFuncNumber].draw());
+                drawRandomLines(() -> drawFunctions[finalFuncNumber].draw());
             }
             for (versuchNummer = 0; versuchNummer < times.length; versuchNummer++) {
                 timesMultpl[funcNumber][versuchNummer] = times[versuchNummer];
@@ -82,7 +122,7 @@ public class MausKlick extends MeinFenster{
 
     private void setPixelBody(int x , int y){
         Graphics g = getGraphics();
-        g.setColor(Color.black);
+        g.setColor(new Color(x1%220, x2%220, y1%220));
         g.fillRect(x,y,1,1);//drawRect
     }
     private void setPixel(int x, int y){
@@ -128,7 +168,32 @@ public class MausKlick extends MeinFenster{
             setPixel(x, m*x+b);
         }
     }
+    void drawLineBresenham(){
+        int y = y1;
+        int dx = x2 - x1;
+        int dy = y2 - y1;
+        if (dx < dy){
+            int tmp;
+            tmp=x1;
+            x1=y1;
+            y1=tmp;
+            tmp=x2;
+            x2=y2;
+            y2=tmp;
+        }
 
+        double m = 2*dy;
+        double err = -dx;
+        int schritt = 2*dx;
+        for (int x=x1; x<=x2; x++) {
+            setPixel(x, y);
+            err += m;
+            if (err>0) {
+                y++;
+                err-=schritt;
+            }
+        }
+    }
     private void drawRandomLines(Runnable function){
         long timeMilliBevor = getCurrentTimeMilliSec();
         for(int i = 0; i<100;i++) {
