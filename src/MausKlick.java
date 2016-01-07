@@ -7,6 +7,7 @@ import static java.lang.Math.toIntExact;
 
 public class MausKlick extends MeinFenster{
     static int ANZ_VERSUCHEN = 10;
+    static int ANZ_PUNKTE = 100;
     Random randomGen = new Random();
     int times[] = new int[ANZ_VERSUCHEN];
     int timesMultpl[][] = new int[5][ANZ_VERSUCHEN];
@@ -18,9 +19,15 @@ public class MausKlick extends MeinFenster{
     int y1=0;
     int y2=0;
 
+    int x1Arr[]=new int [ANZ_PUNKTE];
+    int x2Arr[]=new int [ANZ_PUNKTE];
+    int y1Arr[]=new int [ANZ_PUNKTE];
+    int y2Arr[]=new int [ANZ_PUNKTE];
+
     static boolean DEBUG = false;
 
     int versuchNummer=0;
+    int funcNumber = 0;
 
     interface DrawFigure{
         void draw();
@@ -43,7 +50,8 @@ public class MausKlick extends MeinFenster{
         addMouseListener(new MouseAdapter(){
             @Override
             public void mousePressed(MouseEvent e){
-                fullTest();
+                //fullTest();
+                fullTestNew();
                 printTestResult();
             }
         });
@@ -67,7 +75,7 @@ public class MausKlick extends MeinFenster{
         BoxWhisker boxW = new BoxWhisker(timesMultpl);
 
         //BOX
-        g.drawLine(mainInfoBoxX,placeYBoxerW,mainInfoBoxX + 420,placeYBoxerW);
+        g.drawLine(mainInfoBoxX,placeYBoxerW+15,mainInfoBoxX + 420,placeYBoxerW+15);
         for (int j=0,counter = 0; j<placeYBoxerW-70; j+=10,counter++){
             int laenge = 5;
             if(counter%5==0){
@@ -87,7 +95,7 @@ public class MausKlick extends MeinFenster{
 
             g.drawLine(placeX+shift,placeYBoxerW-qu[1],placeX+shift,+placeYBoxerW-qu[2]);
             g.drawLine(placeX+shift+breighteBox,placeYBoxerW-qu[1],placeX+shift+breighteBox,placeYBoxerW-qu[2]);
-            shift+=40;
+            shift+=70+breighteBox;
         }
 
         g.drawString("Die Testwerte: ",placeX,placeY);
@@ -103,10 +111,11 @@ public class MausKlick extends MeinFenster{
 
     private void fullTest() {
         for(int funcNumber = 0; funcNumber< drawFunctions.length; funcNumber++) {
-
             for (versuchNummer = 0; versuchNummer < times.length; versuchNummer++) {
                 final int finalFuncNumber = funcNumber;
                 drawRandomLines(() -> drawFunctions[finalFuncNumber].draw());
+                drawRect(0,HEIGHT_MAX-20,WIDTH_MAX,20);
+                drawString("versuch nummer: "+ (versuchNummer+1) + ", algorithm: " + (funcNumber+1), 0,HEIGHT_MAX-8);
             }
             for (versuchNummer = 0; versuchNummer < times.length; versuchNummer++) {
                 timesMultpl[funcNumber][versuchNummer] = times[versuchNummer];
@@ -118,6 +127,40 @@ public class MausKlick extends MeinFenster{
             }
             versuchNummer = 0;
         }
+    }
+    private void fullTestNew() {
+
+
+            for (versuchNummer = 0; versuchNummer < times.length; versuchNummer++) {
+                generateCoordsArray();
+
+                for(funcNumber = 0; funcNumber< drawFunctions.length; funcNumber++) {
+                    final int finalFuncNumber = funcNumber;
+                    drawRandomLinesFromArray(() -> drawFunctions[finalFuncNumber].draw());
+                }
+            }
+
+            if (DEBUG) {
+                for (long time : times) {
+                    System.out.println("Versuch " + Long.toString(time));
+                }
+            }
+            versuchNummer = 0;
+    }
+    private void drawRandomLinesFromArray(Runnable function){
+        long timeMilliBevor = getCurrentTimeMilliSec();
+        for(int i = 0; i<100;i++) {
+            x1=x1Arr[i];
+            x2=x2Arr[i];
+            y1=y1Arr[i];
+            y2=y2Arr[i];
+            function.run();
+        }
+
+        long timeMilliDanach = getCurrentTimeMilliSec();
+        timesMultpl[funcNumber][versuchNummer]=toIntExact(timeMilliDanach-timeMilliBevor);
+        if(DEBUG)                                                       System.out.println("Bevor " +Long.toString(timeMilliDanach));
+        if(DEBUG)                                                       System.out.println("Vergangen " +Long.toString(times[versuchNummer]));
     }
 
     private void setPixelBody(int x , int y){
@@ -194,13 +237,21 @@ public class MausKlick extends MeinFenster{
             }
         }
     }
+    private void drawString(String text, int x, int y){
+        Graphics g = getGraphics();
+        g.setColor(Color.black);
+        g.drawString(text,x,y);
+    }
+    private void drawRect(int x , int y , int w, int h){
+        Graphics g = getGraphics();
+        g.setColor(Color.white);
+        g.fillRect(x,y,w,h);
+    }
+
     private void drawRandomLines(Runnable function){
         long timeMilliBevor = getCurrentTimeMilliSec();
         for(int i = 0; i<100;i++) {
-            x1 = randomGen.nextInt(WIDTH_MAX);
-            x2 = randomGen.nextInt(WIDTH_MAX);
-            y1 = randomGen.nextInt(HEIGHT_MAX);
-            y2 = randomGen.nextInt(HEIGHT_MAX);
+            generateCoords();
             function.run();
         }
 
@@ -208,6 +259,22 @@ public class MausKlick extends MeinFenster{
         times[versuchNummer]=toIntExact(timeMilliDanach-timeMilliBevor);
         if(DEBUG)                                                       System.out.println("Bevor " +Long.toString(timeMilliDanach));
         if(DEBUG)                                                       System.out.println("Vergangen " +Long.toString(times[versuchNummer]));
+    }
+
+    private void generateCoords() {
+        x1 = randomGen.nextInt(WIDTH_MAX);
+        x2 = randomGen.nextInt(WIDTH_MAX);
+        y1 = randomGen.nextInt(HEIGHT_MAX);
+        y2 = randomGen.nextInt(HEIGHT_MAX);
+
+    }
+    private void generateCoordsArray() {
+        for(int i =0; i<ANZ_PUNKTE; i++) {
+            x1Arr[i] = randomGen.nextInt(WIDTH_MAX);
+            x2Arr[i] = randomGen.nextInt(WIDTH_MAX);
+            y1Arr[i] = randomGen.nextInt(HEIGHT_MAX);
+            y2Arr[i] = randomGen.nextInt(HEIGHT_MAX);
+        }
     }
 
     private long getCurrentTimeMilliSec() {
