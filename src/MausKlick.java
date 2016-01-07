@@ -17,7 +17,7 @@ public class MausKlick extends MeinFenster{
     int y1=0;
     int y2=0;
 
-    static boolean DEBUG = true;
+    static boolean DEBUG = false;
 
     int versuchNummer=0;
 
@@ -42,24 +42,34 @@ public class MausKlick extends MeinFenster{
             @Override
             public void mousePressed(MouseEvent e){
                 fullTest();
+                printTestResult();
             }
         });
 
     }
 
+    private void printTestResult() {
+        Graphics g = getGraphics();
+        g.setColor(Color.black);
+        g.fillRect(450,250,400,200);//drawRect
+        g.setColor(Color.white);
+        g.drawString("Die Testwerte: ",500,360);
+        BoxWhisker boxW = new BoxWhisker(timesMultpl);
+        int qu[] = boxW.getQues(0);
+        g.drawString("Version 1: Q1:  "+ qu[0] + " Q2 : " + qu[1] + "Q3 : " + qu[2],500,360+20);
+        int qu2[] = boxW.getQues(1);
+        g.drawString("Version 2: Q1:  "+ qu2[0] + " Q2 : " + qu2[1] + "Q3 : " + qu2[2],500,360+20+20);
+    }
+
     private void fullTest() {
         for(int funcNumber = 0 ; funcNumber<drawLines.length; funcNumber++) {
-            for (versuchNummer = 0; versuchNummer < 20; versuchNummer++) {
+
+            for (versuchNummer = 0; versuchNummer < times.length; versuchNummer++) {
                 final int finalFuncNumber = funcNumber;
                 drawRandomLines(() -> drawLines[finalFuncNumber].draw());
             }
-            for (versuchNummer = 0; versuchNummer < 20; versuchNummer++) {
+            for (versuchNummer = 0; versuchNummer < times.length; versuchNummer++) {
                 timesMultpl[funcNumber][versuchNummer] = times[versuchNummer];
-            }
-            try {
-                Thread.currentThread().sleep(4000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
             if (DEBUG) {
                 for (long time : times) {
@@ -118,23 +128,21 @@ public class MausKlick extends MeinFenster{
             setPixel(x, m*x+b);
         }
     }
+
     private void drawRandomLines(Runnable function){
         long timeMilliBevor = getCurrentTimeMilliSec();
         for(int i = 0; i<100;i++) {
-
-
             x1 = randomGen.nextInt(WIDTH_MAX);
             x2 = randomGen.nextInt(WIDTH_MAX);
             y1 = randomGen.nextInt(HEIGHT_MAX);
             y2 = randomGen.nextInt(HEIGHT_MAX);
-            //System.out.println(Integer.toString(x1)+"   "+Integer.toString(x2)+"   "+Integer.toString(y1)+"   "+Integer.toString(y2));
-            //drawLineVersion2(x1, y1, x2, y2);
             function.run();
         }
+
         long timeMilliDanach = getCurrentTimeMilliSec();
-        if(DEBUG)                                              System.out.println("Bevor " +Long.toString(timeMilliDanach));
         times[versuchNummer]=toIntExact(timeMilliDanach-timeMilliBevor);
-        if(DEBUG)                                              System.out.println("Vergangen " +Long.toString(times[versuchNummer]));
+        if(DEBUG)                                                       System.out.println("Bevor " +Long.toString(timeMilliDanach));
+        if(DEBUG)                                                       System.out.println("Vergangen " +Long.toString(times[versuchNummer]));
     }
 
     private long getCurrentTimeMilliSec() {
