@@ -5,7 +5,7 @@ public class BoxWhisker {
     int timeValues[][] ;
     int qArray[] = new int[3];
     static int counter =0;
-    MausKlick lineTest;
+    LineDrawBanchmark lineTest;
 
     BoxWhisker(int daten[][]){
         timeValues=new int[daten.length][];
